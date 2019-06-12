@@ -8,40 +8,44 @@ from tkinter import messagebox
 #================================
 # square objects are the building blocks of our snakw
 class Cube(object):
-    rows = 20
-    w = 500
-    def __init__(self,start,dirnx=1,dirny=0,color=(255,0,0)):
-        self.pos = start
-        self.dirnx = 1
-        self.dirny = 0
+    rows = 40
+    columns = 40
+    width = 600
+    height = 1200 
+    def __init__(self, start_pos, x_move=1, y_move=0, color=(255,0,0)):
+        self.position = start_pos
+        self.x_move = x_move #1
+        self.dirny = y_move # 0
         self.color = color
  
        
-    def move(self, dirnx, dirny):
-        self.dirnx = dirnx
-        self.dirny = dirny
-        self.pos = (self.pos[0] + self.dirnx, self.pos[1] + self.dirny)
+    def move(self, x_move, y_move):
+        self.x_move = x_move
+        self.y_move = y_move
+        self.position = (self.position[0] + self.x_move, self.position[1] + self.y_move)
  
-    def draw(self, surface, eyes=False):
-        dis = self.w // self.rows
-        i = self.pos[0]
-        j = self.pos[1]
+    def draw(self, aSurface, eyes=False):
+        dist_x = self.width // self.rows
+        dist_y = self.height // self.columns
+        
+        i = self.position[0]
+        j = self.position[1]
  
-        pygame.draw.rect(surface, self.color, (i*dis+1,j*dis+1, dis-2, dis-2))
+        pygame.draw.rect(aSurface, self.color, (i*dist_x+1,j*dist_y+1, dist_x-2, dist_y-2))
         if eyes:
-            centre = dis//2
+            centre = dist_x//2 # same as dist_y
             radius = 3
-            circleMiddle = (i*dis+centre-radius,j*dis+8)
-            circleMiddle2 = (i*dis + dis -radius*2, j*dis+8)
-            pygame.draw.circle(surface, (0,0,0), circleMiddle, radius)
-            pygame.draw.circle(surface, (0,0,0), circleMiddle2, radius)
+            circleMiddle = (i*dist_x+centre-radius,j*dist_y+8)
+            circleMiddle2 = (i*dist_x + dist_x -radius*2, j*dist_y+8)
+            pygame.draw.circle(surface, (255,255,255), circleMiddle, radius)
+            pygame.draw.circle(surface, (255,255,255), circleMiddle2, radius)
 
 
 #======================================================
 class Snake(object):
-	snake_body = []
+    snake_body = []
     snake_turns = {}
-    def __init__(self, inColor, inPosition):
+def __init__(self, inColor, inPosition):
     	self.color = inColor
         self.theHead = Cube(inPosition)
         self.snake_body.append(self.theHead)
@@ -51,9 +55,8 @@ class Snake(object):
         self.y_move = 1 
                 
 	def move(self):
-
 		for event in pygame.event.get():
-			pygame.event.type = pygame.QUIT:
+			if (pygame.event.type == pygame.QUIT):
 				pygame.quit()
 		
 		keys = pygame.key.get_pressed()
@@ -102,15 +105,21 @@ class Snake(object):
 				elif (cube_element.y_move == 1 and cube_element.position[1] >= cube_element.rows - 1):
 					cube_element.position = (cube_element.position[0], cube_element.rows -1)
 
-
-				elif (cube_element.y_move) == 1 and cube_element.position[1] >= cube_element.rows - 1):
+				elif (cube_element.y_move == 1 and cube_element.position[1] >= cube_element.rows - 1):
 					cube_element.position = (cube_element.position[0], 0)
 
                 elif (cube_element.y_move == -1 and cube_element.position[1] <= 0):
-					 cube_element.position = (cube_element.position[0],cube_element.rows-1)
+                    cube_element.position = (cube_element.position[0],cube_element.rows-1)
 
-                else: cube_element.move(cube_element.x_move,c.y_move)
+                else:
+                    cube_element.move(cube_element.x_move,c.y_move)
 
+    def draw(self, aSurface):
+        for index, cube_element in enumerate(self.snake_body):
+            if(i==0):
+                cube_element.draw(aSurface, True)
+            else:
+                cube_element.draw(aSurface)
 #===============================
 def drawGrid(aWidth, aHeight, rows, columns, aSurface):
     
@@ -130,15 +139,16 @@ def drawGrid(aWidth, aHeight, rows, columns, aSurface):
 
 
 def redrawWindow(aSurface):
-    global my_rows, my_width, my_height, my_columns
+    global my_rows, my_width, my_height, my_columns, snake_instance
     aSurface.fill((48,10,36))
+    snake_instance.draw(aSurface)
     drawGrid(my_width, my_height, my_rows, my_columns, aSurface)
     pygame.display.update()
 
 
 
 def main():
-    global my_width, my_height, my_rows, my_columns
+    global my_width, my_height, my_rows, my_columns, snake_instance
     my_width = 600
     my_height = 1200
     display_window = pygame.display.set_mode((my_width, my_height))
