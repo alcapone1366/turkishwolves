@@ -4,18 +4,18 @@ import random
 import pygame
 import tkinter as tk
 from tkinter import messagebox
-
+import random
 #================================
 # square objects are the building blocks of our snakw
 class Cube(object):
-    rows = 40
-    columns = 40
+    rows = 15
+    columns = 30
     width = 600
     height = 1200 
     def __init__(self, start_pos, x_move=1, y_move=0, color=(255,0,0)):
         self.position = start_pos
         self.x_move = x_move #1
-        self.dirny = y_move # 0
+        self.y_move = y_move # 0
         self.color = color
  
        
@@ -34,19 +34,19 @@ class Cube(object):
         pygame.draw.rect(aSurface, self.color, (i*dist_x+1,j*dist_y+1, dist_x-2, dist_y-2))
         if eyes:
             centre = dist_x//2 # same as dist_y
-            radius = 3
+            radius = 6
             circleMiddle = (i*dist_x+centre-radius,j*dist_y+8)
             circleMiddle2 = (i*dist_x + dist_x -radius*2, j*dist_y+8)
-            pygame.draw.circle(surface, (255,255,255), circleMiddle, radius)
-            pygame.draw.circle(surface, (255,255,255), circleMiddle2, radius)
+            pygame.draw.circle(aSurface, (255,255,255), circleMiddle, radius)
+            pygame.draw.circle(aSurface, (255,255,255), circleMiddle2, radius)
 
 
 #======================================================
 class Snake(object):
     snake_body = []
     snake_turns = {}
-def __init__(self, inColor, inPosition):
-    	self.color = inColor
+    def __init__(self, inColor, inPosition):
+        self.color = inColor
         self.theHead = Cube(inPosition)
         self.snake_body.append(self.theHead)
 
@@ -54,73 +54,87 @@ def __init__(self, inColor, inPosition):
         self.x_move = 0
         self.y_move = 1 
                 
-	def move(self):
-		for event in pygame.event.get():
-			if (pygame.event.type == pygame.QUIT):
-				pygame.quit()
+    def move(self):
+        for event in pygame.event.get():
+            if (event.type == pygame.QUIT):
+                pygame.quit()
+            
+            keys = pygame.key.get_pressed()
+
+            for key in keys:
+
+                if(keys[pygame.K_LEFT]):
+                    self.x_move = -1
+                    self.y_move = 0
+                    self.snake_turns[self.theHead.position[:]] = [self.x_move, self.y_move]
+
+                elif(keys[pygame.K_RIGHT]):
+                    self.x_move = 1
+                    self.y_move = 0
+                    self.snake_turns[self.theHead.position[:]] = [self.x_move, self.y_move]
+                elif(keys[pygame.K_UP]):
+
+                    self.x_move = 0
+                    self.y_move = -1
+                    self.snake_turns[self.theHead.position[:]] = [self.x_move, self.y_move]
+                elif(keys[pygame.K_DOWN]):
+                    self.x_move = 0
+                    self.y_move = 1
+                    self.snake_turns[self.theHead.position[:]] = [self.x_move, self.y_move]
 		
-		keys = pygame.key.get_pressed()
+            for index, cube_element in enumerate(self.snake_body):
+                temp_position = cube_element.position[:]
 
-		for key in keys:
-			if(keys[pygame.K_LEFT]):
-				self.x_move = -1
-				self.y_move = 0
-				self.snake_turns[self.theHead.position[:]] = [self.x_move, self.y_move]
+                if temp_position in self.snake_turns:
+                    temp_turn = self.snake_turns[temp_position]
+                    cube_element.move(temp_turn[0], temp_turn[1])
 
-			elif(keys[pygame.K_RIGHT]):
-				self.x_move = 1
-				self.y_move = 0
-				self.snake_turns[self.theHead.position[:]] = [self.x_move, self.y_move]
-
-			elif(keys[pygame.K_UP]):
-				self.x_move = 0
-				self.y_move = -1
-				self.snake_turns[self.theHead.position[:]] = [self.x_move, self.y_move]
-
-
-			elif(keys[pygame.K_DOWN]):
-				self.x_move = 0
-				self.y_move = 1
-				self.snake_turns[self.theHead.position[:]] = [self.x_move, self.y_move]
-		
-		for index, cube_element in enumerate(self.snake_body):
-
-			temp_position = cube_element.position[:]
-
-			if temp_position in self.snake_turns:
-				temp_turn = self.snake_turns[temp_position]
-				cube_element.move(temp_turn[0], temp_turn[1])
-
-				if (index == len(self.snake_body) - 1):
-					self.snake_turns.pop(temp_position)
+                    if (index == len(self.snake_body) - 1):
+                        self.snake_turns.pop(temp_position)
 			
 
-			else:
-				if (cube_element.x_move == -1 and cube_element.position[0] <= 0):
-					cube_element.position = (cube_element.rows -1, cube_element.position[1])
-				
-				elif (cube_element.x_move == 1 and cube_element.position[0] >= cube_element.rows - 1):
-					cube_element.position = (0, cube_element.position[1])
-
-				elif (cube_element.y_move == 1 and cube_element.position[1] >= cube_element.rows - 1):
-					cube_element.position = (cube_element.position[0], cube_element.rows -1)
-
-				elif (cube_element.y_move == 1 and cube_element.position[1] >= cube_element.rows - 1):
-					cube_element.position = (cube_element.position[0], 0)
-
-                elif (cube_element.y_move == -1 and cube_element.position[1] <= 0):
-                    cube_element.position = (cube_element.position[0],cube_element.rows-1)
-
                 else:
-                    cube_element.move(cube_element.x_move,c.y_move)
+                    if (cube_element.x_move == -1 and cube_element.position[0] <= 0):
+                        cube_element.position = (cube_element.rows -1, cube_element.position[1])
+                    elif (cube_element.x_move == 1 and cube_element.position[0] >= cube_element.rows - 1):
+                        cube_element.position = (0, cube_element.position[1])
+                    # elif (cube_element.y_move == 1 and cube_element.position[1] >= cube_element.rows - 1):
+                    #     cube_element.position = (cube_element.position[0], cube_element.rows -1)
+                    elif (cube_element.y_move == 1 and cube_element.position[1] >= cube_element.rows - 1):
+                        cube_element.position = (cube_element.position[0], 0)
+
+                    elif (cube_element.y_move == -1 and cube_element.position[1] <= 0):
+                        cube_element.position = (cube_element.position[0],cube_element.rows-1)
+
+                    else:
+                        cube_element.move(cube_element.x_move,cube_element.y_move)
 
     def draw(self, aSurface):
         for index, cube_element in enumerate(self.snake_body):
-            if(i==0):
+            if(index==0):
                 cube_element.draw(aSurface, True)
             else:
                 cube_element.draw(aSurface)
 #===============================
+    def add_cube(self):
+        snake_tail = self.snake_body[-1]
+
+        dx, dy = snake_tail.x_move, snake_tail.y_move
+ 
+        if(dx == 1 and dy == 0):
+            self.snake_body.append(Cube((snake_tail.position[0]-1,snake_tail.position[1])))
+        elif(dx == -1 and dy == 0):
+            self.snake_body.append(Cube((snake_tail.position[0]+1,snake_tail.position[1])))
+        elif(dx == 0 and dy == 1):
+            self.snake_body.append(Cube((snake_tail.position[0],snake_tail.position[1]-1)))
+        elif(dx == 0 and dy == -1):
+            self.snake_body.append(Cube((snake_tail.position[0],snake_tail.position[1]+1)))
+ 
+        self.snake_body[-1].x_move = dx
+        self.snake_body[-1].y_move = dy
+
+
+
 def drawGrid(aWidth, aHeight, rows, columns, aSurface):
     
     horizontal_block_size = my_width // my_columns
@@ -139,24 +153,42 @@ def drawGrid(aWidth, aHeight, rows, columns, aSurface):
 
 
 def redrawWindow(aSurface):
-    global my_rows, my_width, my_height, my_columns, snake_instance
+    global my_rows, my_width, my_height, my_columns, snake_instance, snack
     aSurface.fill((48,10,36))
-    snake_instance.draw(aSurface)
     drawGrid(my_width, my_height, my_rows, my_columns, aSurface)
+    snake_instance.draw(aSurface)
+    snack.draw(aSurface)
     pygame.display.update()
+
+def random_snack(rows,columns, aSnake):
+    # global my_rows, my_columns
+    positions = aSnake.snake_body
+
+    while(True):
+        x_position = random.randrange(rows)
+        y_position = random.randrange(columns)
+
+        if (len(list(filter(lambda x: x.position == (x_position,y_position) , positions))) > 0):
+            continue
+        else:
+            break
+        
+    return (x_position,y_position)
+
 
 
 
 def main():
-    global my_width, my_height, my_rows, my_columns, snake_instance
+    global my_width, my_height, my_rows, my_columns, snake_instance, snack
     my_width = 600
     my_height = 1200
-    display_window = pygame.display.set_mode((my_width, my_height))
     my_rows = 30
     my_columns = 15
-
+    display_window = pygame.display.set_mode((my_width, my_height))
     snake_head_color = (255,0,0)
     initial_position = (25,25)
+    snake_instance = Snake((255,0,0),(10,10))
+    snack = Cube(random_snack(my_rows, my_columns, snake_instance), color=(100,255,50))
     
     # my_snake = Snake(snake_head_color, initial_position)
     flag = True
@@ -164,7 +196,21 @@ def main():
     while(flag):
         pygame.time.delay(69)
         my_clock.tick(10)
+        snake_instance.move()
+        if (snake_instance.snake_body[0].position == snack.position):
+            snake_instance.add_cube()
+            snack = Cube(random_snack(my_rows, my_columns, snake_instance), color=(100,255,50))
         redrawWindow(display_window)
+
+
+
+    #collision
+    for x in range(len(snake_instance.snake_body)):
+        if snake_instance.snake_body[x].position in list(map(lambda z:z.position,snake_instance.snake_body[x+1:])):
+            print("\nScore:    ", len(snake_instance.snake_body))
+            message_box('\nYou Lost!', '\nPlay again...')
+            snake_instance.reset((10,10))
+            break
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 main()
